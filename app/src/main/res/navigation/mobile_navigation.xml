@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/nav_home">
+
+    <fragment
+        android:id="@+id/addMovieFragment"
+        android:name="com.example.myapplication.ui.movies.AddMovieFragment"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        tools:ignore="MissingConstraints">
+        <action
+            android:id="@+id/action_addMovieFragment_to_movieListFragment"
+            app:destination="@id/fragmentMovieList" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/editMovieFragment"
+        android:name="com.example.myapplication.ui.movies.EditMovieFragment"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        tools:ignore="MissingConstraints">
+        <action
+            android:id="@+id/action_editMovieFragment_to_movieListFragment"
+            app:destination="@id/fragmentMovieList" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_home"
+        android:name="com.example.myapplication.ui.home.HomeFragment"
+        android:label="@string/menu_home"
+        tools:layout="@layout/fragment_home" />
+
+    <fragment
+        android:id="@+id/nav_gallery"
+        android:name="com.example.myapplication.ui.gallery.GalleryFragment"
+        android:label="@string/menu_gallery"
+        tools:layout="@layout/fragment_gallery" />
+
+    <fragment
+        android:id="@+id/nav_slideshow"
+        android:name="com.example.myapplication.ui.slideshow.SlideshowFragment"
+        android:label="@string/menu_slideshow"
+        tools:layout="@layout/fragment_slideshow" />
+
+    <fragment
+        android:id="@+id/fragmentMovieList"
+        android:name="com.example.myapplication.ui.movies.MovieListFragment"
+        android:label="Movies"
+        tools:layout="@layout/fragment_movie_list">
+        <action
+            android:id="@+id/action_movieListFragment_to_addMovieFragment"
+            app:destination="@id/addMovieFragment" />
+        <action
+            android:id="@+id/action_movieListFragment_to_editMovieFragment"
+            app:destination="@id/editMovieFragment">
+            <argument
+                android:name="movieId"
+                app:argType="integer" />
+        </action>
+    </fragment>
+
+</navigation>
