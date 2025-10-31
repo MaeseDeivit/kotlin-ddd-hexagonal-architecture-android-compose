@@ -1,5 +1,6 @@
 package com.example.myapplication.src.authusers.infrastructure
 
+import android.util.Log
 import com.example.myapplication.AppContext
 import com.example.myapplication.src.authusers.domain.AuthUser
 import com.example.myapplication.src.authusers.domain.AuthUserRepository
@@ -8,6 +9,7 @@ import com.example.myapplication.src.authusers.domain.valueobjects.AuthUserName
 import com.example.myapplication.src.shared.infrastructure.DataStoreTokenProvider
 import com.example.myapplication.src.shared.infrastructure.GlobalHttpRepository
 import io.ktor.client.*
+import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.serialization.json.*
@@ -30,7 +32,20 @@ class HttpAuthUserRepository(client: HttpClient) : GlobalHttpRepository(client),
     }
 
     override suspend fun getUserInfo(): AuthUser {
-        val response: HttpResponse = request(HttpMethod.Get, USERS_ENDPOINT)
+        val response: HttpResponse
+        try {
+            response = request(HttpMethod.Get, USERS_ENDPOINT)
+        } catch (e: Exception) {
+            Log.e("HttpAuthUserRepository", "Error fetching user info", e)
+            if (e is ClientRequestException && e.response.status.value == 401) {
+                Log.d(
+                    "HttpAuthUserRepository",
+                    "Unauthorized access, token might be invalid or expired."
+                )
+            }
+            throw e
+        }
+
         val json = Json.parseToJsonElement(response.bodyAsText()).jsonObject
 
         return AuthUser(

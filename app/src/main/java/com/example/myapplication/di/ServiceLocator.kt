@@ -10,11 +10,11 @@ import com.example.myapplication.src.movies.infrastructure.HttpMovieRepository
 import com.example.myapplication.src.shared.infrastructure.DataStoreTokenProvider
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
-import kotlinx.serialization.json.Json
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.header
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.serialization.json.Json
 
 object ServiceLocator {
     private val client: HttpClient = HttpClient(CIO) {
@@ -32,7 +32,7 @@ object ServiceLocator {
             }
         }
     }
-
+    
     val authUserServices: AuthUserServices by lazy {
         val repository: AuthUserRepository = HttpAuthUserRepository(client)
         AuthUserServices(repository)

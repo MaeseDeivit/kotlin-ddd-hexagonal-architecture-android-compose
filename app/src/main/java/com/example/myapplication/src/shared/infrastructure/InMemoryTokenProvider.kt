@@ -10,4 +10,8 @@ object InMemoryTokenProvider : TokenProvider {
     override fun setToken(token: String) {
         this.token = token
     }
+
+    override fun clearToken() {
+        this.token = null
+    }
 }
