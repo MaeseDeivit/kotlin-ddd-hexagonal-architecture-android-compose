@@ -1,6 +1,5 @@
 package com.example.myapplication.src.shared.infrastructure
 
-import android.util.Log
 import com.example.myapplication.BuildConfig
 import io.ktor.client.HttpClient
 import io.ktor.client.call.*
@@ -16,7 +15,6 @@ abstract class GlobalHttpRepository(protected val client: HttpClient) {
         headers: Map<String, String> = emptyMap()
     ): T {
         val url = "${BuildConfig.BASE_URL}$endpoint"
-        Log.d("GlobalHttpRepository", "Request URL: $url")
         return try {
             val response: HttpResponse = client.request(url) {
                 this.method = method
@@ -29,24 +27,15 @@ abstract class GlobalHttpRepository(protected val client: HttpClient) {
                     contentType(ContentType.Application.Json)
                     setBody(body)
                 }
-                Log.d("GlobalHttpRepository", "Request body: $body")
             }
 
             if (response.status.isSuccess()) {
                 response.body<T>()
             } else {
-                if (response.status.value == 401) {
-                    Log.d(
-                        "GlobalHttpRepository",
-                        "Unauthorized access, token might be invalid or expired."
-                    )
-
-                } else {
-                    throw Exception("GlobalHttpRepository ${response.status}: ${response.body<String>()}")
-                }
+                throw Exception("GlobalHttpRepository ${response.status}: ${response.body<String>()}")
             }
         } catch (e: Exception) {
             throw e
-        } as T
+        }
     }
 }

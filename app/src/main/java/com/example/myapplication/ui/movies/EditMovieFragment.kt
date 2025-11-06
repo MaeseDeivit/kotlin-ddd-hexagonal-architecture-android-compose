@@ -122,7 +122,7 @@ fun EditMovieCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Edit Movie: $originalTitleMovie",
+                text = "Edit Movie: $originalTitleMovie : id: ${movie.id}",
                 style = MaterialTheme.typography.h5,
                 modifier = Modifier.weight(1f)
             )

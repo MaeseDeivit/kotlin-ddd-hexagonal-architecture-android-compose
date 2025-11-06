@@ -1,8 +1,8 @@
 package com.example.myapplication.src.shared.infrastructure
 
 import android.content.Context
-import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
 import com.example.myapplication.src.shared.domain.TokenProvider
 import kotlinx.coroutines.flow.first
@@ -25,13 +25,5 @@ class DataStoreTokenProvider(private val context: Context) : TokenProvider {
     override fun getToken(): String? = runBlocking {
         val prefs = context.dataStore.data.first()
         prefs[KEY_TOKEN]
-    }
-
-    override fun clearToken() {
-        runBlocking {
-            context.dataStore.edit { prefs ->
-                prefs.remove(KEY_TOKEN)
-            }
-        }
     }
 }

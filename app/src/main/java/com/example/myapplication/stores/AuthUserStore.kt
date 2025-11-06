@@ -39,7 +39,6 @@ object AuthUserStore {
     }
 
     fun loadAuthUser(context: Context): AuthUser? {
-        Log.d("AuthUserStore", "Loading authUser from preferences")
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val json = prefs.getString(KEY_AUTH_USER, null)
         val user = json?.let {
