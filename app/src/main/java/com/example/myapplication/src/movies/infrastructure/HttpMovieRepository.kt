@@ -1,5 +1,6 @@
 package com.example.myapplication.src.movies.infrastructure
 
+import android.util.Log
 import com.example.myapplication.src.movies.domain.Movie
 import com.example.myapplication.src.movies.domain.MovieRepository
 import com.example.myapplication.src.shared.infrastructure.GlobalHttpRepository
@@ -21,16 +22,18 @@ class HttpMovieRepository(client: HttpClient) : GlobalHttpRepository(client),
 
         return json.map {
             Movie(
-                id = it.jsonObject["id"]?.jsonPrimitive?.int ?: 0,
+                id = it.jsonObject["id"]?.jsonPrimitive?.toString() ?: "",
                 title = it.jsonObject["title"]?.jsonPrimitive?.content ?: "",
             )
         }
     }
 
     override suspend fun addMovie(movie: Movie): Unit {
+        Log.d("HttpMovieRepository", "Adding movie: ${movie.title}")
         val response: HttpResponse =
             request(
                 HttpMethod.Post, MOVIES_ENDPOINT, mapOf(
+                    "id" to movie.id,
                     "title" to movie.title
                 )
             )
@@ -51,7 +54,7 @@ class HttpMovieRepository(client: HttpClient) : GlobalHttpRepository(client),
         }
     }
 
-    override suspend fun deleteMovieById(movieId: Int): Unit {
+    override suspend fun deleteMovieById(movieId: String): Unit {
         val response: HttpResponse = request(HttpMethod.Delete, "$MOVIES_ENDPOINT/$movieId")
         if (response.status != HttpStatusCode.OK) {
             throw Exception("Error al eliminar la película")

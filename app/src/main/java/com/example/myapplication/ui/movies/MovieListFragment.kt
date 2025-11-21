@@ -13,21 +13,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.example.myapplication.R
-import com.example.myapplication.di.ServiceLocator
+import com.example.myapplication.src.movies.application.MovieServices
+import com.example.myapplication.src.movies.application.MovieSyncService
 import com.example.myapplication.src.movies.domain.Movie
 import com.example.myapplication.src.movies.infrastructure.MoviesViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MovieListFragment : Fragment() {
 
-    private val moviesViewModel: MoviesViewModel by activityViewModels()
-    private val movieService = ServiceLocator.movieServices
-    private var movies: List<Movie> = emptyList()
+    private val moviesViewModel: MoviesViewModel by viewModels()
+    @Inject
+    lateinit var movieSyncService: MovieSyncService
+    @Inject lateinit var movieService: MovieServices
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -38,42 +43,41 @@ class MovieListFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 val moviesState by moviesViewModel.movies.collectAsState()
-                movies = moviesState
 
                 MaterialTheme {
                     MovieListScreen(
-                        movies = movies,
+                        movies = moviesState,
                         navController = navController,
-                        editMovie = { movieId -> openEditMovieFragment(movieId) },
-                        deleteMovie = { movieId -> deleteMovie(movieId) }
+                        editMovie = { movie -> openEditMovieFragment(movie) },
+                        deleteMovie = { movie -> deleteMovie(movie) },
+                        onRetrySync = { movie -> onRetrySync(movie) }
                     )
                 }
             }
         }
     }
 
+
     override fun onResume() {
         super.onResume()
-        lifecycleScope.launch {
-            if (moviesViewModel.movies.value.isEmpty()) {
-                moviesViewModel.loadMovies(getAllMovies())
-            }
-        }
     }
 
     private suspend fun getAllMovies(): List<Movie> {
-        return movieService.getAllMovies()
+        return movieSyncService.getAllMovies()
     }
 
-    fun openEditMovieFragment(movieId: Int) {
-        val action = MovieListFragmentDirections.actionMovieListFragmentToEditMovieFragment(movieId)
-        findNavController().navigate(action)
+    fun openEditMovieFragment(movie: Movie) {
+        findNavController().navigate(MovieListFragmentDirections.actionMovieListFragmentToEditMovieFragment(movie))
     }
 
-    fun deleteMovie(movieId: Int) {
+    fun deleteMovie(movie: Movie) {
         lifecycleScope.launch {
-            movieService.deleteMovie(movieId)
-            moviesViewModel.deleteMovie(movieId)
+            movieService.deleteMovie(movie)
+        }
+    }
+    fun onRetrySync(movie: Movie) {
+        lifecycleScope.launch {
+            movieService.syncMoviePendingEvents(movie)
         }
     }
 }
@@ -82,8 +86,9 @@ class MovieListFragment : Fragment() {
 fun MovieListScreen(
     movies: List<Movie>,
     navController: NavController,
-    editMovie: (Int) -> Unit,
-    deleteMovie: (Int) -> Unit
+    editMovie: (Movie) -> Unit,
+    deleteMovie: (Movie) -> Unit,
+    onRetrySync: (Movie) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -119,8 +124,9 @@ fun MovieListScreen(
                 items(movies.size) { index ->
                     MovieCard(
                         movie = movies[index],
-                        editMovie = { editMovie(movies[index].id) },
-                        deleteMovie = { deleteMovie(movies[index].id) }
+                        editMovie = { editMovie(movies[index]) },
+                        deleteMovie = { deleteMovie(movies[index]) },
+                        onRetrySync = { onRetrySync(movies[index]) }
                     )
                 }
             }

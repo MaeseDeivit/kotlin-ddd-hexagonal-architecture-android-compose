@@ -29,40 +29,44 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.myapplication.R
-import com.example.myapplication.di.ServiceLocator
+import com.example.myapplication.src.movies.application.MovieServices
 import com.example.myapplication.src.movies.domain.Movie
 import com.example.myapplication.src.movies.infrastructure.MoviesViewModel
 import com.example.myapplication.ui.shared.SharedViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-
+import javax.inject.Inject
+@AndroidEntryPoint
 class EditMovieFragment : Fragment() {
-
-    private val moviesViewModel: MoviesViewModel by activityViewModels()
-    private var movie by mutableStateOf(Movie.emptyMovie())
-    private val movieService = ServiceLocator.movieServices
+    private var movie by mutableStateOf<Movie?>(null)
     private var errorMessages by mutableStateOf(mapOf<String, String?>())
     private var toastMessage by mutableStateOf<String?>(null)
     private val sharedViewModel: SharedViewModel by activityViewModels()
+    @Inject lateinit var movieService: MovieServices
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        movie = requireArguments().getParcelable<Movie>("movie")
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val movieId = arguments?.getInt("movieId") ?: 0
-        movie = moviesViewModel.getMovieById(movieId)!!
-        val originalTitleMovie = movie.title
-
+        val originalTitleMovie = movie?.title.orEmpty()
         return ComposeView(requireContext()).apply {
             setContent {
                 MaterialTheme {
-                    EditMovieCard(
-                        originalTitleMovie = originalTitleMovie,
-                        movie = movie,
-                        errorMessages = errorMessages,
-                        onMovieChange = { movie = it },
-                        onSave = { updateMovie() },
-                        toastMessage = toastMessage
-                    )
+                    movie?.let {
+                        EditMovieCard(
+                            originalTitleMovie = originalTitleMovie,
+                            movie = it,
+                            errorMessages = errorMessages,
+                            onMovieChange = { movie = it },
+                            onSave = { updateMovie() },
+                            toastMessage = toastMessage
+                        )
+                    }
                 }
             }
         }
@@ -72,9 +76,8 @@ class EditMovieFragment : Fragment() {
         val isValid = validateFields()
         if (isValid) {
             lifecycleScope.launch {
-                movieService.updateMovie(movie)
-                moviesViewModel.updateMovie(movie)
                 sharedViewModel.showToast("Película guardada correctamente!")
+                movieService.updateMovie(movie!!)
                 findNavController().navigate(R.id.action_editMovieFragment_to_movieListFragment)
             }
         } else {
@@ -84,7 +87,7 @@ class EditMovieFragment : Fragment() {
 
     private fun validateFields(): Boolean {
         val errors = mutableMapOf<String, String?>()
-        if (movie.title.isBlank()) {
+        if (movie?.title?.isBlank() ?: true) {
             errors["title"] = "El título no puede estar vacío"
         }
         errorMessages = errors

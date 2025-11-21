@@ -25,20 +25,23 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.myapplication.R
-import com.example.myapplication.di.ServiceLocator
+import com.example.myapplication.src.movies.application.MovieServices
 import com.example.myapplication.src.movies.domain.Movie
 import com.example.myapplication.src.movies.infrastructure.MoviesViewModel
 import com.example.myapplication.ui.shared.SharedViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 import kotlin.getValue
 
+@AndroidEntryPoint
 class AddMovieFragment : Fragment() {
     private val moviesViewModel: MoviesViewModel by activityViewModels()
-    private val movieService = ServiceLocator.movieServices
     private var movie: Movie by mutableStateOf(Movie.emptyMovie())
     private var errorMessages by mutableStateOf(mapOf<String, String?>())
     private var toastMessage by mutableStateOf<String?>(null)
     private val sharedViewModel: SharedViewModel by activityViewModels()
+    @Inject lateinit var movieService: MovieServices
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -64,7 +67,6 @@ class AddMovieFragment : Fragment() {
         if (isValid) {
             lifecycleScope.launch {
                 movieService.addMovie(movie)
-                moviesViewModel.addMovieToList(movie)
                 sharedViewModel.showToast("Película guardada correctamente!")
                 findNavController().navigate(R.id.action_addMovieFragment_to_movieListFragment)
             }

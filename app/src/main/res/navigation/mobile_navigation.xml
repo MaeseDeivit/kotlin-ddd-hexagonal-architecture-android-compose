@@ -57,8 +57,8 @@
             android:id="@+id/action_movieListFragment_to_editMovieFragment"
             app:destination="@id/editMovieFragment">
             <argument
-                android:name="movieId"
-                app:argType="integer" />
+                android:name="movie"
+                app:argType="com.example.myapplication.src.movies.domain.Movie" />
         </action>
     </fragment>
 

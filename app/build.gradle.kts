@@ -3,7 +3,9 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.serialization)
     id("androidx.navigation.safeargs.kotlin")
-
+    id("kotlin-kapt")
+    alias(libs.plugins.hilt.android)
+    id("kotlin-parcelize")
 }
 
 android {
@@ -101,4 +103,10 @@ dependencies {
 
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
+
+    kapt(libs.androidx.room.compiler)
+    kapt(libs.hilt.android.compiler)
+    kapt(libs.hilt.android)}
+kapt {
+    correctErrorTypes = true
 }

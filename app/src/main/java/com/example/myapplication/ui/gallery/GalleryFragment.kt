@@ -8,17 +8,21 @@ import android.view.ViewGroup
 import android.widget.Button
 import androidx.fragment.app.Fragment
 import com.example.myapplication.databinding.FragmentGalleryBinding
-import com.example.myapplication.di.ServiceLocator
 import androidx.lifecycle.lifecycleScope
+import com.example.myapplication.src.authusers.application.AuthUserServices
 import com.example.myapplication.stores.AuthUserStore
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class GalleryFragment : Fragment() {
 
     private var _binding: FragmentGalleryBinding? = null
     private val binding get() = _binding!!
-    private val authUserServices = ServiceLocator.authUserServices
+    @Inject
+    lateinit var authUserServices: AuthUserServices
 
     override fun onCreateView(
         inflater: LayoutInflater,
